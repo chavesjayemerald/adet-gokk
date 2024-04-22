@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const Manga = require("../models/mangaModel");
+const User = require("../models/userModel");
 const multer = require("multer");
 const fs = require("fs");
 
@@ -12,11 +14,23 @@ var storage = multer.diskStorage({
     },
 });
 
+const requireLogin = (req, res, next) => {
+    if (req.session && req.session.user) {
+        next();
+    } else {
+        req.session.message = {
+            type: 'danger',
+            message: 'You must be logged in to view this page',
+        };
+        res.redirect('/');
+    }
+};
+
 var uploadCover = multer({
     storage: storage,
 }).single('coverImg');
 
-router.post('/add', uploadCover, (req, res) => {
+router.post('/add', requireLogin, uploadCover, (req, res) => {
     const manga = new Manga({
         title: req.body.title,
         description: req.body.description,
@@ -29,7 +43,7 @@ router.post('/add', uploadCover, (req, res) => {
                 type: "success",
                 message: "Manga Added Successfully"
             };
-            res.redirect("/");
+            res.redirect("/home");
         })
         .catch(err => {
             res.json({message: err.message, type: "danger"});
@@ -37,7 +51,48 @@ router.post('/add', uploadCover, (req, res) => {
 
 });
 
-router.get("/", (req, res) => {
+router.post('/signup', async (req, res) => {
+    const {username, password} = req.body;
+
+    try {
+        const existingUser = await User.findOne({username});
+        if(existingUser) return res.status(400).json({error: 'Username is already taken.'});
+
+        const user = new User({username, password});
+        const savedUser = await user.save();
+
+        req.session.user = savedUser;
+        return res.redirect('/home');
+    } catch (err) {
+        res.status(500).json({error: 'Server error, please try again.'});
+    }
+});
+
+router.post("/login", async (req, res) => {
+    try {
+        const user = await User.collection.findOne({username: req.body.username});
+        if(!user) return res.status(400).send("Username not found!");
+        if(user.password !== req.body.password) return res.status(400).send("Wrong password!");
+
+        req.session.user = user;
+        return res.redirect("/home");
+    } catch(e) {
+        console.log(e);
+        res.status(500).send("Error Occurred!");
+    }
+});
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(function(err) {
+        if (err) {
+            return res.redirect('/home');
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+    })
+});
+
+router.get("/home", requireLogin, (req, res) => {
     Manga.find().exec()
         .then(mangas => {
             res.render("index", {
@@ -50,7 +105,7 @@ router.get("/", (req, res) => {
         });
 });
 
-router.get("/add", (req, res) => { 
+router.get("/add", requireLogin, (req, res) => { 
     res.render("addmanga", { title: "Add Mangas" });
 });
 
@@ -59,7 +114,7 @@ router.get("/edit/:id", (req, res) => {
     Manga.findById(id)
       .then(manga => {
           if(!manga) {
-              res.redirect("/");
+              res.redirect("/home");
           }else{
               res.render("editmanga", {
                   title: "Edit Manga",
@@ -73,7 +128,7 @@ router.get("/edit/:id", (req, res) => {
       });
   });
 
-  router.post("/update/:id", uploadCover, async (req, res) => {
+router.post("/update/:id", uploadCover, async (req, res) => {
     let newcoverImg = "";
     
     if (req.file) {
@@ -100,7 +155,7 @@ router.get("/edit/:id", (req, res) => {
             type: "success",
             message: "Manga updated successfully."
         };
-        res.redirect("/");
+        res.redirect("/home");
 
     } catch (err) {
         return res.status(500).json({ message: err.message });
@@ -119,7 +174,7 @@ router.get("/delete/:id", async (req, res) => {
             type: "info",
             message: "Manga deleted Successfully!"
         };
-        res.redirect("/");
+        res.redirect("/home");
     } 
     catch(err){
         console.log(err);

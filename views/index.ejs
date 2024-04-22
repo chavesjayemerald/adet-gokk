@@ -17,7 +17,6 @@
                                 <th class="text-center">  </th>
                                 <th class="text-center">  </th>
                                 <th class="text-center">  </th>
-                                <th class="text-center">  </th>
                                 <th class="text-center"> - </th>
                             </tr>
                         </thead>
@@ -29,10 +28,6 @@
                                     <td class="text-center"><%= row.title %></td>
                                     <td class="text-center"><%= row.description %></td>
                                     <th class="text-center"><%= row.chapters %></th>
-                                    <td class="text-center">
-                                        <a href="/edit/<%= row._id %>" class="text-success" aria-label="Edit <%= row.title %>"><i class="fas fa-edit fa-lg mx-1"></i></a>
-                                        <a href="/delete/<%= row._id %>" class="text-danger" aria-label="Delete <%= row.title %>"><i class="fas fa-trash fa-lg mx-1"></i></a>
-                                    </td>
                                 </tr>
                             <% }) %>
                         </tbody>
@@ -43,5 +38,6 @@
             </div>
         </div>
     </div>
+    
 </div>
 <%- include("layout/footer") %>
