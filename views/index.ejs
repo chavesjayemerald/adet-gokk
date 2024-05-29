@@ -38,6 +38,38 @@
             </div>
         </div>
     </div>
-    
 </div>
+<div class="chatbot" style="position: fixed; bottom: 50px; left: 0; width: 300px; background-color: white; padding: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); display: block;" id="chatbot">
+    <h2>Welcome to GoKomiks BOT</h2>
+    <div>
+        <label for="manga-query">
+            <h5>Anything I can help you with?</h5> 
+        </label>
+        <h1></h1>
+        <form action="/whatisgokomiks" method="POST">
+            <button type="submit">What is GoKomiks?</button>
+        </form>
+        <h1></h1>
+        <form action="/manga" method="POST">
+            <button type="submit">What is the latest manga?</button>
+        </form>
+        <h1></h1>
+        <form action="/highrated" method="POST">
+            <button type="submit">What is the highest rated manga?</button>
+        </form>
+        <h1></h1>
+        <form action="/mostviewed" method="POST">
+            <button type="submit">What is the most read manga?</button>
+        </form>
+    </div>
+</div>
+<button onclick="toggleChatbot()" aria-controls="chatbot" aria-expanded="true" style="position: fixed; bottom: 10px; left: 10px;">BOT</button>
+<script>
+    function toggleChatbot() {
+        var chatbot = document.getElementById('chatbot');
+        var isVisible = chatbot.style.display === 'block';
+        chatbot.style.display = isVisible ? 'none' : 'block';
+        document.querySelector('button[aria-controls="chatbot"]').setAttribute('aria-expanded', !isVisible);
+    }
+</script>
 <%- include("layout/footer") %>
