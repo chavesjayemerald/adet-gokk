@@ -92,6 +92,52 @@ router.get('/logout', (req, res) => {
     })
 });
 
+router.post('/manga', requireLogin, (req, res) => {
+    const username = req.body.username;
+    Manga.find()
+        .then(mangas => {
+            res.render('manga', { username, mangas });
+        })
+        .catch(err => {
+            res.status(500).json({ message: err.message });
+        });
+});
+
+router.post('/mostviewed', requireLogin, (req, res) => {
+    const username = req.body.username;
+    Manga.find()
+        .then(mostviewedmangas => {
+            res.render('mostviewed', { username, mostviewedmangas });
+        })
+        .catch(err => {
+            res.status(500).json({ message: err.message });
+        });
+});
+
+router.post('/highrated', requireLogin, (req, res) => {
+    const username = req.body.username;
+    Manga.find()
+        .then(highratedmangas => {
+            res.render('highrated', { username, highratedmangas });
+        })
+        .catch(err => {
+            res.status(500).json({ message: err.message });
+        });
+});
+
+router.post('/whatisgokomiks', requireLogin, (req, res) => {
+    const username = req.body.username;
+    Manga.find()
+        .then(gokomiks => {
+            res.render('whatisgokomiks', { username, gokomiks });
+        })
+        .catch(err => {
+            res.status(500).json({ message: err.message });
+        });
+});
+
+
+
 router.get("/home", requireLogin, (req, res) => {
     Manga.find().exec()
         .then(mangas => {
